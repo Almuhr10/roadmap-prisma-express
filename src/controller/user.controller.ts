@@ -1,7 +1,10 @@
-import { User } from '@prisma/client';
-import { NextFunction, Request, Response } from 'express';
-import { prisma } from '../config/db';
-import { GetUserByIdSchemaType } from '../zod_schema/user.schema';
+import { Movie, User } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
+import { prisma } from "../config/db";
+import {
+  GetUserByIdSchemaType,
+  UserSchemaType,
+} from "../zod_schema/user.schema";
 
 export const addUserHandler = async (
   req: Request,
@@ -14,11 +17,11 @@ export const addUserHandler = async (
     await prisma.user.create({
       data: newUser,
     });
-    return res.status(201).json({ message: 'New user added !' });
+    return res.status(201).json({ message: "New user added !" });
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
     return res.status(500).json({
-      message: 'Server Error !',
+      message: "Server Error !",
     });
   }
 };
@@ -51,20 +54,37 @@ export const getUsersHandler = async (
         };
       }
     }
-    console.log('filter', filter);
+    console.log("filter", filter);
     const users = await prisma.user.findMany({ where: filter });
     return res.status(200).json(users);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: 'Server Error !' });
+    return res.status(500).json({ message: "Server Error !" });
   }
 };
 
-export const getUserByIdHandler = async (
+export const updateUserHandler = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  try {
+    const newUser = req.body as User;
+    const { id } = req.params as UserSchemaType;
+
+    await prisma.user.update({
+      where: { id },
+      data: newUser,
+    });
+    return res.status(200).json({ message: "Movie updated" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server Error !",
+    });
+  }
+};
+
+export default async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as GetUserByIdSchemaType;
     const user = await prisma.user.findUnique({
@@ -74,6 +94,6 @@ export const getUserByIdHandler = async (
     return res.status(200).json(user);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: 'Server Error !' });
+    return res.status(500).json({ message: "Server Error !" });
   }
 };
