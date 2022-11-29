@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
-import MovieRouter from "./routes/movie.route";
+import BookRouter from "./routes/book.route";
 import UserRouter from "./routes/user.route";
+import LoanRouter from "./routes/loan.route";
 import "dotenv/config";
 import { connectDB } from "./config/db";
 import bodyParser from "body-parser";
@@ -13,8 +14,9 @@ connectDB();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/api/v1/movie", MovieRouter);
+app.use("/api/v1/loans", LoanRouter);
 app.use("/api/v1/users", UserRouter);
+app.use("/api/v1/books", BookRouter);
 
 const start = (): void => {
   try {

@@ -1,2 +1,3 @@
-export * from "./movie.route";
+export * from "./book.route";
 export * from "./user.route";
+export * from "./loan.route";

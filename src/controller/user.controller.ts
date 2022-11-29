@@ -1,10 +1,7 @@
-import { Movie, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { prisma } from "../config/db";
-import {
-  GetUserByIdSchemaType,
-  UserSchemaType,
-} from "../zod_schema/user.schema";
+import { UserSchemaType } from "../zod_schema/user.schema";
 
 export const addUserHandler = async (
   req: Request,
@@ -13,7 +10,6 @@ export const addUserHandler = async (
 ) => {
   try {
     let newUser = req.body as User;
-    newUser.joiningYear = new Date(newUser.joiningYear);
     await prisma.user.create({
       data: newUser,
     });
@@ -32,30 +28,7 @@ export const getUsersHandler = async (
   next: NextFunction
 ) => {
   try {
-    let filter = {};
-    if (req.query) {
-      if (req.query.email) {
-        filter = { email: req.query.email };
-      } else if (req.query.age) {
-        filter = { age: { gt: +req.query.age } };
-      } else if (req.query.role) {
-        // count
-        filter = { role: req.query.role };
-      } else if (req.query.username && req.query.password) {
-        filter = {
-          username: req.query.username,
-          password: req.query.password,
-        };
-      } else if (req.query.joiningYear) {
-        filter = {
-          joiningYear: {
-            gte: new Date(req.query.joiningYear.toString()),
-          },
-        };
-      }
-    }
-    console.log("filter", filter);
-    const users = await prisma.user.findMany({ where: filter });
+    const users = await prisma.user.findMany();
     return res.status(200).json(users);
   } catch (error) {
     console.log(error);
@@ -63,30 +36,9 @@ export const getUsersHandler = async (
   }
 };
 
-export const updateUserHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const newUser = req.body as User;
-    const { id } = req.params as UserSchemaType;
-
-    await prisma.user.update({
-      where: { id },
-      data: newUser,
-    });
-    return res.status(200).json({ message: "Movie updated" });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Server Error !",
-    });
-  }
-};
-
 export default async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params as GetUserByIdSchemaType;
+    const { id } = req.params as UserSchemaType;
     const user = await prisma.user.findUnique({
       where: { id },
     });
